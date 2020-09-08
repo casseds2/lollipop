@@ -19,7 +19,7 @@
   [rules]
   (alter-var-root #'system (fn [_] (create-system rules))))
 
-(defn stop
+(defn- stop
   []
   (info "Stopping Proxy Protect...")
   (alter-var-root #'system
@@ -27,7 +27,6 @@
                     (if sys
                       (component/stop sys)
                       (error "System not initialised. Stop failed.")))))
-
 
 (defn- start
   []
@@ -38,8 +37,7 @@
       (catch Exception e
         (error e "Could not start system")
         (stop)))
-    (error "System not initialised")))
-
+    (error "System not initialised.")))
 
 (defonce cli-opts
   [["-r" "--rules RULES" "Path to rules.json"
@@ -52,5 +50,4 @@
         (init rules)
         (start))
       (catch Exception e
-        (error "Error starting Proxy Protect" e))))
-
+        (error "Error starting Proxy Protect." e))))

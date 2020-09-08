@@ -3,3 +3,4 @@
 ### Added
 - Rules Component
 - Webserver Component
+- Wrap Proxy Middleware

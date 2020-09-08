@@ -5,6 +5,6 @@
                  [org.clojure/tools.logging "1.1.0"]
                  [com.stuartsierra/component "1.0.0"]
                  [metosin/jsonista "0.2.7"]
-                 [ring/ring-jetty-adapter "1.8.1"]
+                 [http-kit "2.4.0"]
                  [compojure "1.6.2"]]
   :main proxy-protect.core)
