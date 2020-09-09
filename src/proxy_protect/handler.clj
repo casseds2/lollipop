@@ -1,27 +1,44 @@
 (ns proxy-protect.handler
   (:require [compojure.core :refer [routes wrap-routes ANY]]
-            [clojure.tools.logging :refer [warn]]
+            [clojure.tools.logging :refer [warnf]]
             [ring.util.response :refer [response status]]
-            [proxy-protect.components.rules :refer [proxy-request]]))
+            [proxy-protect.http :refer [proxy-request]]))
 
 (defonce test-unprotected-routes
-  (ANY "/insecure" [] "<h1>Insecure Example</h1>"))
+  (routes (ANY "/abs-insecure" [] "<h1>Absolute Insecure Example</h1>")
+          (ANY "/reg-insecure" [] "<h1>Regex Insecure Example</h1>")))
 
 (defonce test-protected-routes
   (ANY "*" []))
 
+(defn request-method->string
+  [request-method]
+  (case request-method
+    :get "GET"
+    :put "PUT"
+    :post "POST"
+    :delete "DELETE"
+    :patch "PATCH"
+    "GET"))
+
+(defn- respond-not-found
+  [request]
+  (warnf "No proxy for method %s on URI %s"
+         (request-method->string (:request-method request))
+         (:uri request))
+  (-> "No Route to Proxy"
+      response
+      (status 404)))
+
 (defn- wrap-proxy
   [_handler-fn rules]
   (fn [request]
-    (loop [[{:keys [rule-fn destination] :as rule} & rules'] rules]
+    (loop [[{:keys [match-fn destination] :as rule} & rules'] rules]
       (if rule
-        (if (rule-fn request)
+        (if (match-fn request)
           (proxy-request request destination)
           (recur rules'))
-        (do (warn "No proxy for URI" (:uri request))
-            (-> "No Route to Proxy"
-                response
-                (status 404)))))))
+        (respond-not-found request)))))
 
 (defn handler
   [rules]

@@ -20,7 +20,7 @@
       (when webserver
         (webserver))
       (catch Exception e
-        (error e (str "Error stopping Webserver"))))
+        (error e (str "Error stopping Webserver."))))
     (info "Stopped Webserver Component.")
     (assoc component :handler nil
                      :rules nil
