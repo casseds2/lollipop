@@ -1,7 +1,27 @@
 (ns proxy-protect.components.rules
-  (:require [clojure.tools.logging :refer [info]]
+  (:require [clojure.tools.logging :refer [info warnf debug]]
             [com.stuartsierra.component :as component]
+            [clojure.spec.alpha :as spec]
             [cheshire.core :as json]))
+
+(spec/def ::type #{"regex" "absolute" "redirect"})
+(spec/def ::allowedMethods #(every? #{"get" "put" "post" "delete" "patch" "any"} %))
+(spec/def ::source #(and (string? %) (clojure.string/starts-with? % "/")))
+(spec/def ::destination string?)
+(spec/def ::rule (spec/keys :req-un [::type ::source ::destination]
+                            :opt-un [::allowedMethods]))
+
+(defn valid-rule?
+  [rule]
+  (let [valid? (spec/valid? ::rule rule)
+        {:keys [type source destination]} rule]
+    (when (false? valid?)
+      (warnf "Invalid %s Rule %s -> %s"
+              (clojure.string/capitalize type)
+              source
+              destination)
+      (debug (spec/explain-str ::rule rule)))
+    valid?))
 
 (defn http-method-allowed?
   [allowed-methods request-method]
@@ -19,6 +39,7 @@
                               (and (http-method-allowed? allowed-methods
                                                          request-method)
                                    (= uri (:source rule))))))))
+
 (defmethod create-match-fn "regex"
   [rule]
   (let [pattern (re-pattern (:source rule))
@@ -28,6 +49,7 @@
                               (and (http-method-allowed? allowed-methods
                                                          request-method)
                                    (re-matches pattern uri)))))))
+
 (defmethod create-match-fn "redirect"
   [rule]
   (assoc rule :match-fn (fn [request]
@@ -46,6 +68,7 @@
     (assoc component :rules (->> rules
                                  slurp
                                  rules->edn
+                                 (filterv valid-rule?)
                                  (mapv create-match-fn))))
   (stop [component]
     (info "Stopping the Rules Component...")
