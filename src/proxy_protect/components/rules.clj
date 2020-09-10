@@ -15,7 +15,7 @@
   [rule]
   (let [allowed-methods (:allowedMethods rule)]
     (assoc rule :match-fn (fn [request]
-                            (let [{:keys [request-method  uri]} request]
+                            (let [{:keys [request-method uri]} request]
                               (and (http-method-allowed? allowed-methods
                                                          request-method)
                                    (= uri (:source rule))))))))
@@ -24,10 +24,16 @@
   (let [pattern (re-pattern (:source rule))
         allowed-methods (:allowedMethods rule)]
     (assoc rule :match-fn (fn [request]
-                            (let [{:keys [request-method  uri]} request]
+                            (let [{:keys [request-method uri]} request]
                               (and (http-method-allowed? allowed-methods
                                                          request-method)
                                    (re-matches pattern uri)))))))
+(defmethod create-match-fn "redirect"
+  [rule]
+  (assoc rule :match-fn (fn [request]
+                          (let [{:keys [request-method uri]} request]
+                            (and (= request-method :get)
+                                 (= uri (:source rule)))))))
 
 (defn- rules->edn
   [rules]

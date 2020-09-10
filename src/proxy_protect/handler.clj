@@ -1,12 +1,12 @@
 (ns proxy-protect.handler
-  (:require [compojure.core :refer [routes wrap-routes ANY]]
+  (:require [compojure.core :refer [routes wrap-routes GET POST ANY]]
             [clojure.tools.logging :refer [warnf]]
             [ring.util.response :refer [response status]]
-            [proxy-protect.http :refer [proxy-request]]))
+            [proxy-protect.http :as http]))
 
 (defonce test-unprotected-routes
-  (routes (ANY "/abs-insecure" [] "<h1>Absolute Insecure Example</h1>")
-          (ANY "/reg-insecure" [] "<h1>Regex Insecure Example</h1>")))
+  (routes (GET "/insecure" [] "<h1>GET Insecure Example</h1>")
+          (POST "/insecure" [] "<h1>POST Insecure Example</h1>")))
 
 (defonce test-protected-routes
   (ANY "*" []))
@@ -33,10 +33,10 @@
 (defn- wrap-proxy
   [_handler-fn rules]
   (fn [request]
-    (loop [[{:keys [match-fn destination] :as rule} & rules'] rules]
+    (loop [[{:keys [match-fn] :as rule} & rules'] rules]
       (if rule
         (if (match-fn request)
-          (proxy-request request destination)
+          (http/proxy-request request rule)
           (recur rules'))
         (respond-not-found request)))))
 

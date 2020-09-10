@@ -8,5 +8,6 @@
                  [cheshire "5.10.0"]
                  [http-kit "2.4.0-alpha5"]
                  [clj-http "3.10.2"]
-                 [compojure "1.6.2"]]
+                 [compojure "1.6.2"]
+                 [org.clojure/core.async "1.3.610"]]
   :main proxy-protect.core)

@@ -1,14 +1,19 @@
 [
   {
     "type": "absolute",
-    "allowedMethods": ["any"],
-    "source": "/abs-secure",
-    "destination": "http://127.0.0.1:3000/abs-insecure"
+    "allowedMethods": ["get"],
+    "source": "/insecure",
+    "destination": "http://127.0.0.1:3000/insecure"
   },
   {
     "type": "regex",
-    "allowedMethods": ["get"],
-    "source": "/reg-sec.*",
-    "destination": "http://127.0.0.1:3000/reg-insecure"
+    "allowedMethods": ["post"],
+    "source": "/in.*",
+    "destination": "http://127.0.0.1:3000/insecure"
+  },
+  {
+    "type": "redirect",
+    "source": "/redirect",
+    "destination": "http://127.0.0.1:3000/insecure"
   }
 ]

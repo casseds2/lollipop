@@ -6,14 +6,18 @@ The type field is used to indicate what type of rule the configuration
 represents. Types have the following possible values:
 - `absolute`
 - `regex`
+- `redirect`
 
 #### Absolute
-An absolute type field will only match if he source URI is exactly the same as
+An absolute type rule will only match if he source URI is exactly the same as
 the `source field.
 
 #### Regex
-A regex field will convert the source field into a regular expression and
+A regex type rule will convert the source field into a regular expression and
 attempt to match this against the URI.
+
+#### Redirect
+A redirect type rule will redirect the user to a given URL with a `302` response.
 
 ### Allowed Methods
 The allowed methods field us used to configure what HTTP methods are allowed in
