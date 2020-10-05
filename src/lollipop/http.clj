@@ -1,4 +1,4 @@
-(ns proxy-protect.http
+(ns lollipop.http
   (:require [clj-http.client :as http]
             [clojure.tools.logging :refer [error debug]]
             [ring.util.response :refer [response status redirect]]
@@ -37,11 +37,16 @@
       (catch Exception e (debug e)))
     response-channel))
 
+;; TODO - `create-destination-uri` for building partials / params as well as regulars.
+;; TODO - Introduce the idea of partial routes
+
 (defn proxy-request
   [request rule]
-  (let [{:keys [destination type]} rule]
+  (let [{:keys [destination-fn type]} rule
+        destination (destination-fn rule request)]
     (case type
       "redirect" (redirect destination)
       (async/<!!
-        (async/go (-> (async-request request destination)
+        (async/go (-> request
+                      (async-request destination)
                       async/<!))))))

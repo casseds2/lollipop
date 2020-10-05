@@ -1,6 +1,6 @@
 [
   {
-    "type": "absolute",
+    "type": "exact",
     "allowedMethods": ["get"],
     "source": "/insecure",
     "destination": "http://127.0.0.1:3000/insecure"

@@ -1,10 +1,12 @@
-(ns proxy-protect.components.rules
+(ns lollipop.components.rules
   (:require [clojure.tools.logging :refer [info warnf debug]]
             [com.stuartsierra.component :as component]
             [clojure.spec.alpha :as spec]
             [cheshire.core :as json]))
 
-(spec/def ::type #{"regex" "absolute" "redirect"})
+;; TODO - Different validation for every type of rule
+
+(spec/def ::type #{"regex" "exact" "redirect"})
 (spec/def ::allowedMethods #(every? #{"get" "put" "post" "delete" "patch" "any"} %))
 (spec/def ::source #(and (string? %) (clojure.string/starts-with? % "/")))
 (spec/def ::destination string?)
@@ -30,17 +32,18 @@
                (= % string-request-method))
           allowed-methods)))
 
-(defmulti create-match-fn :type)
-(defmethod create-match-fn "absolute"
+(defmulti create-rule-fns :type)
+(defmethod create-rule-fns "exact"
   [rule]
   (let [allowed-methods (:allowedMethods rule)]
     (assoc rule :match-fn (fn [request]
                             (let [{:keys [request-method uri]} request]
                               (and (http-method-allowed? allowed-methods
                                                          request-method)
-                                   (= uri (:source rule))))))))
+                                   (= uri (:source rule)))))
+                :destination-fn (constantly (:destination rule)))))
 
-(defmethod create-match-fn "regex"
+(defmethod create-rule-fns "regex"
   [rule]
   (let [pattern (re-pattern (:source rule))
         allowed-methods (:allowedMethods rule)]
@@ -48,14 +51,27 @@
                             (let [{:keys [request-method uri]} request]
                               (and (http-method-allowed? allowed-methods
                                                          request-method)
-                                   (re-matches pattern uri)))))))
+                                   (re-matches pattern uri))))
+                :destination-fn (constantly (:destination rule)))))
 
-(defmethod create-match-fn "redirect"
+(defmethod create-rule-fns "redirect"
   [rule]
   (assoc rule :match-fn (fn [request]
                           (let [{:keys [request-method uri]} request]
                             (and (= request-method :get)
-                                 (= uri (:source rule)))))))
+                                 (= uri (:source rule)))))
+              :destination-fn (constantly (:destination rule))))
+
+;; TODO - Create a regex for matching the partial source
+;; TODO - Create the destination from the partial route
+;(defmethod create-rule-fns "partial"
+;  [rule]
+;  (let [allowed-methods (:allowedMethods rule)]
+;    (assoc rule :match-fn (fn [request]
+;                            (let [{:keys [request-method uri]} request]
+;                              (and (http-method-allowed? allowed-methods
+;                                                         request-method))))
+;                :destination-fn (constantly (:destination rule))))
 
 (defn- rules->edn
   [rules]
@@ -69,7 +85,7 @@
                                  slurp
                                  rules->edn
                                  (filterv valid-rule?)
-                                 (mapv create-match-fn))))
+                                 (mapv create-rule-fns))))
   (stop [component]
     (info "Stopping the Rules Component...")
     (assoc component :rules nil)))

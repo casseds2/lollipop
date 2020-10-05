@@ -1,10 +1,10 @@
-(ns proxy-protect.core
+(ns lollipop.core
   (:require [clojure.tools.cli :as cli]
             [com.stuartsierra.component :as component]
             [clojure.tools.logging :refer [info error]]
-            [proxy-protect.handler :refer [handler]]
-            [proxy-protect.components.rules :as rules]
-            [proxy-protect.components.webserver :as webserver]))
+            [lollipop.handler :refer [handler]]
+            [lollipop.components.rules :as rules]
+            [lollipop.components.webserver :as webserver]))
 
 (def system nil)
 
@@ -21,7 +21,7 @@
 
 (defn- stop
   []
-  (info "Stopping Proxy Protect...")
+  (info "Stopping Lollipop...")
   (alter-var-root #'system
                   (fn [sys]
                     (if sys
@@ -30,7 +30,7 @@
 
 (defn- start
   []
-  (info "Starting Proxy Protect...")
+  (info "Starting Lollipop...")
   (if system
     (try
       (alter-var-root #'system component/start)
@@ -50,4 +50,4 @@
         (init rules)
         (start))
       (catch Exception e
-        (error "Error starting Proxy Protect." e))))
+        (error "Error starting Lollipop." e))))

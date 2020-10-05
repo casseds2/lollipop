@@ -1,15 +1,7 @@
-(ns proxy-protect.handler
-  (:require [compojure.core :refer [routes wrap-routes GET POST ANY]]
-            [clojure.tools.logging :refer [warnf]]
+(ns lollipop.middleware
+  (:require [clojure.tools.logging :refer [warnf]]
             [ring.util.response :refer [response status]]
-            [proxy-protect.http :as http]))
-
-(defonce test-unprotected-routes
-  (routes (GET "/insecure" [] "<h1>GET Insecure Example</h1>")
-          (POST "/insecure" [] "<h1>POST Insecure Example</h1>")))
-
-(defonce test-protected-routes
-  (ANY "*" []))
+            [lollipop.http :as http]))
 
 (defn request-method->string
   [request-method]
@@ -30,7 +22,9 @@
       response
       (status 404)))
 
-(defn- wrap-proxy
+;; TODO - add metrics on requests
+
+(defn wrap-proxy
   [_handler-fn rules]
   (fn [request]
     (loop [[{:keys [match-fn] :as rule} & rules'] rules]
@@ -39,10 +33,3 @@
           (http/proxy-request request rule)
           (recur rules'))
         (respond-not-found request)))))
-
-(defn handler
-  [rules]
-  (routes test-unprotected-routes
-          (wrap-routes
-            test-protected-routes
-            wrap-proxy rules)))

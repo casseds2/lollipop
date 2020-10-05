@@ -5,7 +5,7 @@
 - Webserver Component
 - Wrap Proxy Middleware
 - Protect Routes by HTTP Method
-- Regex and Absolute Path Match for Source URI
+- Regex and Exact Path Match for Source URI
 
 ### Changed
 - Now using log4j2

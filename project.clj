@@ -1,5 +1,5 @@
-(defproject proxy-protect "0.1.0-SNAPSHOT"
-  :description "Proxy Protect"
+(defproject lollipop "0.1.0-SNAPSHOT"
+  :description "Lollipop"
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.cli "1.0.194"]
                  [org.clojure/tools.logging "1.1.0"]
@@ -10,4 +10,4 @@
                  [clj-http "3.10.2"]
                  [compojure "1.6.2"]
                  [org.clojure/core.async "1.3.610"]]
-  :main proxy-protect.core)
+  :main lollipop.core)

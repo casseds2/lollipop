@@ -4,12 +4,12 @@
 ### Type
 The type field is used to indicate what type of rule the configuration
 represents. Types have the following possible values:
-- `absolute`
+- `exact`
 - `regex`
 - `redirect`
 
-#### Absolute
-An absolute type rule will only match if he source URI is exactly the same as
+#### Exact
+An exact type rule will only match if he source URI is exactly the same as
 the `source field.
 
 #### Regex

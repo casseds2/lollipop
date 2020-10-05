@@ -1,4 +1,4 @@
-(ns proxy-protect.components.webserver
+(ns lollipop.components.webserver
   (:require [clojure.tools.logging :refer [info error]]
             [com.stuartsierra.component :as component]
             [org.httpkit.server :as server]))
